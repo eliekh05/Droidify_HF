@@ -28,7 +28,11 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 
-STATIC_DIR = Path(__file__).parent.parent.parent / "frontend"
+# In the HF container: WORKDIR is /home/user/app
+# frontend/ is copied to /home/user/app/frontend/
+# Use env var for flexibility, fall back to absolute container path
+import os as _os
+STATIC_DIR = Path(_os.environ.get("STATIC_DIR", "/home/user/app/frontend"))
 
 
 @asynccontextmanager
