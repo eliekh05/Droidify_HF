@@ -95,7 +95,7 @@ app = FastAPI(
     title="Droidify API",
     description="Live Android ROM, device and recovery indexer.",
     version="2.0.0",
-    docs_url="/docs",
+    docs_url=None,
     lifespan=lifespan,
 )
 
@@ -113,6 +113,24 @@ app.include_router(recoveries_router,   prefix="/api/recoveries",        tags=["
 app.include_router(tools_router,        prefix="/api/tools",             tags=["tools"])
 app.include_router(android_router,      prefix="/api/android-versions",  tags=["android"])
 app.include_router(guides_router,       prefix="/api/guides",            tags=["guides"])
+
+
+@app.get("/api-reference", include_in_schema=False)
+async def api_reference():
+    """Human-readable styled API reference page."""
+    if "STATIC_DIR" in dir():
+        from fastapi.responses import FileResponse as _FR2
+        return _FR2(str(STATIC_DIR / "openapi.html"))
+    import pathlib as _pl2
+    from fastapi.responses import FileResponse as _FR2
+    frontend2 = _pl2.Path(__file__).parent.parent.parent / "frontend"
+    return _FR2(str(frontend2 / "openapi.html"))
+
+
+@app.get("/docs", include_in_schema=False)
+async def custom_docs():
+    """Serve our custom styled Swagger UI."""
+    return FileResponse(str(STATIC_DIR / "docs.html"))
 
 
 @app.get("/api/health")
