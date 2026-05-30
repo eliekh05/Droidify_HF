@@ -1,0 +1,33 @@
+name: Sync to Hugging Face Spaces
+
+# Runs on every push to main/master in the GitHub repo
+# Pushes the full repo to the HF Space via git
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:  # allow manual trigger from GitHub Actions UI
+
+jobs:
+  sync:
+    name: Push to Hugging Face
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout GitHub repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history so HF gets proper git log
+
+      - name: Push to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git config user.email "action@github.com"
+          git config user.name "GitHub Actions"
+
+          # Add HF Space as a remote
+          git remote add hf https://eliekh05:${HF_TOKEN}@huggingface.co/spaces/eliekh05/Droidify_HF
+
+          # Force push to HF (HF Space repos don't preserve history anyway)
+          git push hf main:main --force
