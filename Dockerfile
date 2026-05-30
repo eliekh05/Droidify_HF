@@ -15,7 +15,8 @@ RUN adduser -D -u 1000 -g "" user
 ENV HOME=/home/user \
     PATH=/home/user/.local/bin:$PATH \
     PORT=7860 \
-    CACHE_DEFAULT_TTL=300
+    CACHE_DEFAULT_TTL=300 \
+    STATIC_DIR=/home/user/app/frontend
 
 WORKDIR /home/user/app
 
