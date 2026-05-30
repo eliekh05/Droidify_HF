@@ -17,7 +17,9 @@
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
     nav.addEventListener('click', e => {
-      if (e.target.classList.contains('nav-link')) {
+      // Close on any link click inside nav (Bulma uses navbar-item)
+      const link = e.target.closest('a');
+      if (link) {
         nav.classList.remove('open');
         toggle.setAttribute('aria-expanded', 'false');
       }
