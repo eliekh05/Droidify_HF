@@ -19,7 +19,6 @@
       const open = nav.classList.contains('is-active');
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
-    // Close when any link is tapped
     nav.addEventListener('click', e => {
       if (e.target.closest('a')) {
         toggle.classList.remove('is-active');

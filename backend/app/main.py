@@ -1,10 +1,4 @@
-"""Droidify — FastAPI backend (Hugging Face Spaces build).
-
-This is the single-container build for Hugging Face Spaces.
-FastAPI serves both the static frontend AND the /api/* routes on port 7860.
-The main repo (github.com/eliekh05/Droidify) uses a two-container setup
-(nginx + FastAPI) — that version is for self-hosting on Proxmox/VPS.
-"""
+"""FastAPI application — startup, CORS, route registration, cache warm."""
 import asyncio
 import logging
 import os
@@ -34,7 +28,6 @@ logging.basicConfig(
 import os as _os
 STATIC_DIR = Path(_os.environ.get("STATIC_DIR", "/home/user/app/frontend"))
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     _log = logging.getLogger("droidify.startup")
@@ -45,7 +38,6 @@ async def lifespan(app: FastAPI):
 
     async def _warm():
         try:
-            # Phase 1 — fast sources
             from app.scrapers.devices import _get_all_devices
             from app.scrapers.recoveries import get_recoveries
             from app.scrapers.android_versions import get_android_versions
@@ -58,7 +50,6 @@ async def lifespan(app: FastAPI):
             )
             _log.warning("Phase 1 warm complete")
 
-            # Phase 2 — ROM indexes
             from app.scrapers.sourceforge_roms import get_sourceforge_roms
             from app.scrapers.pixelexperience import get_pixelexperience_roms
             from app.scrapers.community_roms import get_all_community_roms
@@ -73,7 +64,6 @@ async def lifespan(app: FastAPI):
             )
             _log.warning("Phase 2 warm complete")
 
-            # Phase 3 — build lookup table
             from app.scrapers.roms import _build_lookup
             from app.scrapers.unofficialtwrp import get_unofficialtwrp_devices
             await asyncio.gather(
@@ -89,7 +79,6 @@ async def lifespan(app: FastAPI):
     yield
     save_to_disk()
     _log.warning("Cache saved to disk on shutdown")
-
 
 app = FastAPI(
     title="Droidify API",
@@ -116,7 +105,6 @@ app.include_router(tools_router,        prefix="/api/tools",             tags=["
 app.include_router(android_router,      prefix="/api/android-versions",  tags=["android"])
 app.include_router(guides_router,       prefix="/api/guides",            tags=["guides"])
 
-
 @app.get("/api-reference", include_in_schema=False)
 async def api_reference():
     """Human-readable styled API reference page."""
@@ -128,17 +116,14 @@ async def api_reference():
     frontend2 = _pl2.Path(__file__).parent.parent.parent / "frontend"
     return _FR2(str(frontend2 / "openapi.html"))
 
-
 @app.get("/docs", include_in_schema=False)
 async def custom_docs():
     """Serve our custom styled Swagger UI."""
     return FileResponse(str(STATIC_DIR / "docs.html"))
 
-
 @app.get("/api/health")
 async def health():
     return {"status": "ok", "build": "huggingface"}
-
 
 # Catch-all SPA fallback — serves index.html for any path not matched above
 # Must be LAST route, BEFORE the StaticFiles mount
@@ -151,7 +136,6 @@ async def spa_fallback(full_path: str):
         return FileResponse(str(target))
     # Always fall back to index.html for SPA routing
     return FileResponse(str(STATIC_DIR / "index.html"))
-
 
 # Mount static files for direct asset serving (CSS, JS, images, etc.)
 # Must come AFTER the catch-all route so /api/* routes and the catch-all win
