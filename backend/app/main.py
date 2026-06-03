@@ -108,18 +108,26 @@ app.include_router(guides_router,       prefix="/api/guides",            tags=["
 @app.get("/api-reference", include_in_schema=False)
 async def api_reference():
     """Human-readable styled API reference page."""
-    if "STATIC_DIR" in dir():
-        from fastapi.responses import FileResponse as _FR2
-        return _FR2(str(STATIC_DIR / "openapi.html"))
     import pathlib as _pl2
     from fastapi.responses import FileResponse as _FR2
-    frontend2 = _pl2.Path(__file__).parent.parent.parent / "frontend"
-    return _FR2(str(frontend2 / "openapi.html"))
+    _static = _pl2.Path(
+        os.environ.get("STATIC_DIR",
+            str(_pl2.Path(__file__).parent.parent.parent / "frontend"))
+    )
+    return _FR2(str(_static / "openapi.html"))
 
 @app.get("/docs", include_in_schema=False)
 async def custom_docs():
     """Serve our custom styled Swagger UI."""
     return FileResponse(str(STATIC_DIR / "docs.html"))
+
+
+# Optional private module — loaded if present. No-op if absent.
+try:
+    from app.private.owner import register_owner_routes as _reg
+    _reg(app)
+except ModuleNotFoundError:
+    pass
 
 @app.get("/api/health")
 async def health():
