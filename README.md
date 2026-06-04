@@ -7,6 +7,8 @@ sdk: docker
 app_port: 7860
 license: mit
 short_description: Live Android ROM and device indexer
+thumbnail: >-
+  https://cdn-uploads.huggingface.co/production/uploads/6a1af537dc5908e8dde41c43/Rw6SwNRIJ2KP4slueh2Fm.png
 ---
 
 # Droidify
