@@ -1,12 +1,9 @@
 name: Sync to Hugging Face Spaces
 
-# Runs on every push to main/master in the GitHub repo
-# Pushes the full repo to the HF Space via git
-
 on:
   push:
     branches: [main, master]
-  workflow_dispatch:  # allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
 
 jobs:
   sync:
@@ -17,17 +14,20 @@ jobs:
       - name: Checkout GitHub repo
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # full history so HF gets proper git log
+          fetch-depth: 0
+
+      - name: Write build info to bust HF Docker layer cache
+        run: |
+          echo "sha=${{ github.sha }}" > BUILD_INFO
+          echo "ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> BUILD_INFO
+          git config user.email "action@github.com"
+          git config user.name "GitHub Actions"
+          git add BUILD_INFO
+          git diff --cached --quiet || git commit -m "ci: bust cache [${{ github.sha }}]"
 
       - name: Push to Hugging Face Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          git config user.email "action@github.com"
-          git config user.name "GitHub Actions"
-
-          # Add HF Space as a remote
           git remote add hf https://eliekh05:${HF_TOKEN}@huggingface.co/spaces/eliekh05/Droidify_HF
-
-          # Force push to HF (HF Space repos don't preserve history anyway)
           git push hf main:main --force

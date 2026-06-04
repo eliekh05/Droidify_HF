@@ -7,4 +7,7 @@ build/
 .env
 .env.local
 .env.production
+
+# BUILD_INFO is intentionally committed — it busts Docker cache
+!BUILD_INFO
 .DS_Store

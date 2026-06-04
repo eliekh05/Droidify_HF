@@ -1,6 +1,5 @@
 # Droidify — Hugging Face Spaces Dockerfile
 # Single container: FastAPI serves static frontend + all /api/* routes on port 7860
-# Main repo (self-hosted): github.com/eliekh05/Droidify — uses nginx + FastAPI, port 80
 
 FROM python:3.12-alpine AS builder
 WORKDIR /build
@@ -9,7 +8,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 FROM python:3.12-alpine
 
-# HF Spaces requires UID 1000
 RUN adduser -D -u 1000 -g "" user
 
 ENV HOME=/home/user \
@@ -20,14 +18,23 @@ ENV HOME=/home/user \
 
 WORKDIR /home/user/app
 
-# Copy installed packages from builder
 COPY --from=builder /usr/local/lib/python3.12/site-packages \
                     /usr/local/lib/python3.12/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
-# Copy app code and frontend
-COPY --chown=user:user backend/app     ./app
-COPY --chown=user:user frontend ./frontend
+# BUILD_INFO changes on every push — busts all subsequent COPY layers
+COPY --chown=user:user BUILD_INFO  ./BUILD_INFO
+COPY --chown=user:user backend/app  ./app
+COPY --chown=user:user frontend     ./frontend
+
+# Bust service worker and HTML asset cache on every build.
+# date +%s gives a unique timestamp each time docker build runs.
+# HF rebuilds the image on every push so users always get fresh files.
+RUN BUILD_V=$(date +%s) && \
+    echo "[cache-bust] v=${BUILD_V}" && \
+    sed -i "s/droidify-v[0-9]*/droidify-v${BUILD_V}/g" ./frontend/sw.js && \
+    find ./frontend -name "*.html" -exec \
+        sed -i "s/?v=[0-9]*/?v=${BUILD_V}/g" {} \;
 
 USER user
 EXPOSE 7860
