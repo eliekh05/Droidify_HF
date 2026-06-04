@@ -11,7 +11,7 @@ short_description: Live Android ROM and device indexer
 
 # Droidify
 
-Live Android ecosystem indexer. Devices, ROMs, recoveries, tools, guides, and buying/selling advice — fetched in real time from 20+ public sources. No hardcoded data. No login. No payment.
+Live Android ecosystem indexer. Devices, ROMs, recoveries, tools, guides, and buying/selling advice — fetched in real time from 20+ public sources. No hardcoded data. No payment. Sign in with GitHub is optional — browse everything without an account.
 
 **Use the hosted version:** [eliekh05-droidify-hf.hf.space](https://eliekh05-droidify-hf.hf.space)
 

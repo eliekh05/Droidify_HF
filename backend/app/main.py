@@ -16,6 +16,8 @@ from app.api.tools import router as tools_router
 from app.api.roms import router as roms_router
 from app.api.recoveries import router as recoveries_router
 from app.api.guides import router as guides_router
+from app.api.auth import router as auth_router
+from app.api.terms_api import router as terms_router
 
 logging.basicConfig(
     level=logging.WARNING,
@@ -32,6 +34,8 @@ STATIC_DIR = Path(_os.environ.get("STATIC_DIR", "/home/user/app/frontend"))
 async def lifespan(app: FastAPI):
     _log = logging.getLogger("droidify.startup")
     from app.services.cache import load_from_disk, save_to_disk
+    from app.db import init_db
+    await init_db()
     restored = load_from_disk()
     _log.warning("Cache restored: %d entries from disk", restored)
     _log.warning("Warming caches...")
