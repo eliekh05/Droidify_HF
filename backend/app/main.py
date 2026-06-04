@@ -39,27 +39,21 @@ async def lifespan(app: FastAPI):
             from app.scrapers.sourceforge_roms import get_sourceforge_roms
             from app.scrapers.pixelexperience import get_pixelexperience_roms
             from app.scrapers.unofficialtwrp import get_unofficialtwrp_devices
-
-            await asyncio.gather(
-                get_devices(limit=50), get_android_versions(), get_tools(),
-                return_exceptions=True,
-            )
-            _log.warning("Phase 1 warm complete")
-
-            await asyncio.gather(
-                get_recoveries(limit=1), get_sourceforge_roms(), get_pixelexperience_roms(),
-                return_exceptions=True,
-            )
-            _log.warning("Recovery indexes will warm on first request")
-            _log.warning("Phase 2 warm complete")
-
             from app.scrapers.roms import _build_lookup
+
+            # Run all scrapers concurrently — no sequential phases
             await asyncio.gather(
+                get_devices(limit=50),
+                get_android_versions(),
+                get_tools(),
+                get_recoveries(limit=1),
+                get_sourceforge_roms(),
+                get_pixelexperience_roms(),
                 get_unofficialtwrp_devices(),
                 _build_lookup(),
                 return_exceptions=True,
             )
-            _log.warning("Phase 3 warm complete — all caches hot")
+            _log.warning("All caches hot")
 
         except Exception as e:
             _log.warning("Warmup error (non-fatal): %s", e)
