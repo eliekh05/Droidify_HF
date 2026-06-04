@@ -5,6 +5,7 @@ import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.devices import router as devices_router
@@ -139,6 +140,11 @@ app.include_router(roms_router,       prefix="/api/roms",             tags=["rom
 app.include_router(recoveries_router, prefix="/api/recoveries",       tags=["recoveries"])
 app.include_router(guides_router,     prefix="/api/guides",           tags=["guides"])
 if not_read_router:
-    app.include_router(not_read_router, prefix="")
+    app.include_router(not_read_router, prefix="/not-read")
 app.include_router(auth_router,       prefix="/api/auth",            tags=["auth"])
 app.include_router(terms_router,      prefix="/api/terms",            tags=["auth"])
+
+# Serve frontend static files — must be last so API routes take priority
+_static_dir = os.environ.get("STATIC_DIR",
+    str(os.path.join(os.path.dirname(__file__), "..", "..", "frontend")))
+app.mount("/", StaticFiles(directory=_static_dir, html=True), name="static")
