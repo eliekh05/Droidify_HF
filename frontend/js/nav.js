@@ -123,13 +123,27 @@
   function applyTheme(theme) {
     if (theme === 'system') {
       document.documentElement.removeAttribute('data-theme');
+      // Manually apply system preference since CSS @media inside selectors
+      // has limited browser support — set data-theme to match system
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+      // But mark it as system so we know to follow changes
+      document.documentElement.setAttribute('data-system-theme', '1');
     } else {
+      document.documentElement.removeAttribute('data-system-theme');
       document.documentElement.setAttribute('data-theme', theme);
     }
     document.querySelectorAll('.theme-btn').forEach(function (btn) {
       btn.classList.toggle('active', btn.dataset.theme === theme);
     });
   }
+
+  // Watch for system theme changes while in system mode
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+    if (document.documentElement.getAttribute('data-system-theme')) {
+      document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+    }
+  });
 
   function setupThemeSwitcher() {
     const switcher = document.getElementById('theme-switcher');
