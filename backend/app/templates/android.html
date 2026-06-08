@@ -19,7 +19,9 @@
           <td style="color:var(--muted)">{{ (v.release_year or '—') | string | e }}</td>
           <td>
             {% if v.status == 'active' %}<span class="tag is-success">ACTIVE</span>
-            {% elif v.status == 'partial' %}<span class="tag is-warning">PREVIEW</span>
+            {% elif v.status == 'partial' %}<span class="tag is-warning">PARTIAL</span>
+            {% elif v.status == 'unsupported' %}<span class="tag is-dark">UNSUPPORTED</span>
+            {% elif v.status == 'preview' %}<span class="tag is-info">PREVIEW</span>
             {% else %}<span class="tag is-dark">EOL</span>{% endif %}
           </td>
         </tr>
