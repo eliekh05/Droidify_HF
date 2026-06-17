@@ -3,7 +3,6 @@ name: Sync to Hugging Face Spaces
 on:
   push:
     branches: [main, master]
-  workflow_dispatch:
 
 jobs:
   sync:
