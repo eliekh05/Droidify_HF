@@ -1,4 +1,4 @@
-"""ROM Assistant API — Claude with real Droidify data via tool use."""
+"""ROM Assistant API — Groq with real Droidify data via tool use."""
 import httpx
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
