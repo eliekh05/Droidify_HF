@@ -183,7 +183,7 @@ async def assistant(req: AssistantRequest, request: Request):
         try:
             async with httpx.AsyncClient(timeout=30) as client:
                 r = await client.post(
-                    "https://api.groq.com/openai/v1/chat/completions",
+                    "https://api.groq.com/openai/v1/",
                     headers={
                         "Content-Type": "application/json",
                         "Authorization": f"Bearer {os.environ.get('GROQ_API_KEY', '')}",
